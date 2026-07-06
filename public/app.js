@@ -29,8 +29,8 @@ async function doLogin() {
             throw new Error((await res.json().error || 'Login Failed'));
         const { token, userId } = await res.json();
 
-        myUserId = userId;
-        myUser = {
+        state.myUserId = userId;
+        state.myUser = {
             name: userId,
             initials: initialsFor(userId),
             color: avatarColor(userId)
@@ -39,7 +39,7 @@ async function doLogin() {
         $('myAvatar').style.background = `linear-gradient(135deg, ${state.myUser.color}, #3dcfa0)`;
         $('myName').textContent = state.myUser.name;
         $('loginOverlay').style.display = 'none';
-        
+
         connectSocket(token);
     } catch (e) {
         errEl.textContent = e.message;

@@ -32,7 +32,7 @@ const redis = createClient({
 
 redis.on('connect',         () => console.log('[redis] Connecting...'));
 redis.on('ready',           () => console.log('[redis] Ready'));
-redis.on('error',        (err) => console.warn('[redis] Error: ', err.message));
+redis.on('error',        (err) => console.error(`[redis] ${err}`));
 redis.on('reconnecting',    () => console.warn('[redis] Reconnecting...'));
 redis.on('end',             () => console.warn('[redis] Connection ended'));
 

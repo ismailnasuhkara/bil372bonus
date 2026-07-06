@@ -16,7 +16,7 @@ app.post('/api/token', (req, res) => {
     const username = (req.body?.username || '').trim();
     if (!username) return res.status(400).json({ error: 'username is required '});
 
-    const token = JsonWebTokenError.sign(
+    const token = jwt.sign(
         { sub: username, username, roles: [] },
         config.auth.jwtSecret,
         { expiresIn: config.auth.jwtExpiresIn }
