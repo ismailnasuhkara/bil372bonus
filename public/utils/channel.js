@@ -1,5 +1,5 @@
 import { renderMessages } from "./message.js";
-import state from "./state.js";
+import { state, $ } from "./state.js";
 
 export function renderChannels() {
     const list = $('channelList');

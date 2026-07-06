@@ -1,5 +1,6 @@
 import { connectSocket } from './utils/socket.js';
 import { renderChannels, joinChannel } from './utils/channel.js';
+import { state, $ } from './utils/state.js';
 import {
     renderMessages,
     sendMessage,
@@ -8,10 +9,9 @@ import {
     toggleReaction,
     buildMessageRow
 } from './utils/message.js';
-import state from './utils/state.js';
 
 async function doLogin() {
-    const usernane = $('loginUsername').value.trim();
+    const username = $('loginUsername').value.trim();
     const errEl = $('loginError');
     errEl.textContent = '';
     if (!username) {

@@ -17,7 +17,7 @@ export async function toggleReaction(msgId, emoji, userId) {
     await redis
         .multi()
         [alreadyReacted ? 'sRem' : 'sAdd'](setKey, userId)
-        .hIncrBy(reactCountsKey, emoji, alreadyReacted ? -1 : 1)
+        .hIncrBy(reactCountKey, emoji, alreadyReacted ? -1 : 1)
         .exec()
 
     const reactions = await getReactions(msgId);

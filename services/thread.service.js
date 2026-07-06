@@ -12,7 +12,7 @@ export async function getThread(parentId) {
 
     const replyIds = await redis.zRange(threadKey(parentId), 0, -1);
     if (!replyIds.length) return { 
-        parent: { id: preantId, ...parent },
+        parent: { id: parentId, ...parent },
         replies: []
     };
 
@@ -21,7 +21,7 @@ export async function getThread(parentId) {
     );
 
     return {
-        parent: { id: prentId, ...parent },
+        parent: { id: parentId, ...parent },
         replies: replies
             .map((reply, i) => ({ id: replyIds[i], ...reply }))
             .filter(r => r.text !== undefined)

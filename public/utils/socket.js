@@ -1,6 +1,6 @@
 import { renderChannels, joinChannel } from "./channel.js";
 import { renderMessages, renderPinned } from "./message.js";
-import state from "./state.js";
+import { state, $ } from "./state.js";
 
 export function connectSocket(token) {
     socket = io({ auth: { token } });

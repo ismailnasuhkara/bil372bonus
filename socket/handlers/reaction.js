@@ -7,7 +7,7 @@ import {
 export function registerReactionHandlers(io, socket) {
     socket.on('message:react', async ({ msgId, emoji }) => {
         const { channelId, reactions, action } = await toggleReaction(msgId, emoji, socket.user.id);
-        io.to(msg.channelId).emit('message:reactions', { msgId, reactions, action });
+        io.to(channelId).emit('message:reactions', { msgId, reactions, action });
     });
 
     socket.on('message:fetch_react', async ({ msgId }) => {

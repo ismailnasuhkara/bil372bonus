@@ -8,6 +8,6 @@ export function registerMessageHandlers(io, socket) {
 
     socket.on('message:fetch_msg', async ({ channelId, before, limit }) => {
         const msg = await getMessages(channelId, { before, limit });
-        socket.emit('messages:list', messages);
+        socket.emit('message:list', messages);
     })
 }
