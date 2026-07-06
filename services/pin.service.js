@@ -10,7 +10,7 @@ export async function pinMessage(channelId, msgId) {
     await redis
         .multi()
         .hSet(msgKey(msgId), 'pinned', '1')
-        .zAdd(pinsKey(channelId), { score: pinnedAt, msgId })
+        .zAdd(pinsKey(channelId), { score: pinnedAt, value: msgId })
         .exec();
 }
 

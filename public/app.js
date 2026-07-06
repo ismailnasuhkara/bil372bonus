@@ -35,11 +35,11 @@ async function doLogin() {
             initials: initialsFor(userId),
             color: avatarColor(userId)
         };
-        $('myInitials').textContent = myUser.initials;
-        $('myAvatar').style.background = `linear-gradient(135deg, ${myUser.color}, #3dcfa0)`;
-        $('myName').textContent = myUser.name;
-
+        $('myInitials').textContent = state.myUser.initials;
+        $('myAvatar').style.background = `linear-gradient(135deg, ${state.myUser.color}, #3dcfa0)`;
+        $('myName').textContent = state.myUser.name;
         $('loginOverlay').style.display = 'none';
+        
         connectSocket(token);
     } catch (e) {
         errEl.textContent = e.message;

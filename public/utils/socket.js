@@ -3,76 +3,77 @@ import { renderMessages, renderPinned } from "./message.js";
 import { state, $ } from "./state.js";
 
 export function connectSocket(token) {
-    socket = io({ auth: { token } });
+    state.socket = io({ auth: { token } });
 
-    socket.on('connect', () => {
+    state.socket.on('connect', () => {
         $('connBadge').classList.remove('disconnected');
-        $('connLabel').textContent = 'Live';
+        $('connLabel').textContent = 'Online';
         renderChannels();
-        joinChannel(CHANNELS[0]);
+        joinChannel(state.CHANNELS[0]);
     });
 
-    socket.on('disconnect', () => {
+    state.socket.on('disconnect', () => {
         $('connBadge').classList.add('disconnected');
         $('connLabel').textContent = 'Offline';
     });
 
-    socket.on('connect_error', (err) => {
+    state.socket.on('connect_error', (err) => {
         $('connBadge').classList.add('disconnected');
         $('connLabel').textContent = 'Error';
         console.error('connect_error', err.message);
     });
 
-    socket.on('error', (err) => console.error('[server error]', err));
+    state.socket.on('error', (err) => console.error('[server error]', err));
 
-    socket.on('message:new', (msg) => {
-        (channelMessages[msg.channelId] ||= []).push(msg);
-        if (msg.channelId === currentChannel?.id) {
+    state.socket.on('message:new', (msg) => {
+        (state.channelMessages[msg.channelId] ||= []).push(msg);
+        if (msg.channelId === state.currentChannel?.id) {
             renderMessages();
         } else {
-            unread[msg.channelId] = (unread[msg.channelId] || 0) + 1;
+            state.unread[msg.channelId] = (state.unread[msg.channelId] || 0) + 1;
             renderChannels();
         }
     });
 
-    socket.on('messages:list', ({ messages }) => {
-        if (!currentChannel) return;
+    state.socket.on('messages:list', ({ messages }) => {
+        if (!state.currentChannel) return;
         // server returns newest-first; render oldest-first
-        channelMessages[currentChannel.id] = [...messages].reverse();
+        state.channelMessages[state.currentChannel.id] = [...messages].reverse();
         renderMessages();
     });
 
-    socket.on('message:reactions', ({ msgId, reactions }) => {
-        reactionsByMsg[msgId] = reactions;
+    state.socket.on('message:reactions', ({ msgId, reactions }) => {
+        state.reactionsByMsg[msgId] = reactions;
         renderMessages();
     });
 
-    socket.on('message:pinned', () => {
-        if (currentChannel) socket.emit('pins:fetch', { channelId: currentChannel.id });
+    state.socket.on('message:pinned', () => {
+        if (state.currentChannel) state.socket.emit('pins:fetch', { channelId: state.currentChannel.id });
     });
 
-    socket.on('message:unpinned', () => {
-        if (currentChannel) socket.emit('pins:fetch', { channelId: currentChannel.id });
+    state.socket.on('message:unpinned', () => {
+        if (state.currentChannel) state.socket.emit('pins:fetch', { channelId: state.currentChannel.id });
     });
 
-    socket.on('pins:list', ({ channelId, pins }) => {
-        if (channelId !== currentChannel?.id) return;
-        currentPins = pins;
+    state.socket.on('pins:list', ({ channelId, pins }) => {
+        if (channelId !== state.currentChannel?.id) 
+            return;
+        state.currentPins = pins;
         renderPinned();
     });
 
-    socket.on('thread:loaded', (thread) => {
-        threadReplies[thread.parent.id] = thread.replies;
+    state.socket.on('thread:loaded', (thread) => {
+        state.threadReplies[thread.parent.id] = thread.replies;
         renderMessages();
     });
 
-    socket.on('thread:reply', (reply) => {
-        (threadReplies[reply.replyTo] ||= []).push(reply);
+    state.socket.on('thread:reply', (reply) => {
+        (state.threadReplies[reply.replyTo] ||= []).push(reply);
         renderMessages();
     });
 
-    socket.on('message:reply_count', ({ msgId, replyCount }) => {
-        const list = channelMessages[currentChannel?.id] || [];
+    state.socket.on('message:reply_count', ({ msgId, replyCount }) => {
+        const list = state.channelMessages[state.currentChannel?.id] || [];
         const target = list.find(m => m.id === msgId);
         if (target) target.replyCount = replyCount;
         renderMessages();
