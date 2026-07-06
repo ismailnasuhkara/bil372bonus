@@ -1,4 +1,5 @@
 import { escapeHtml, avatarColor, formatTime } from "./format.js";
+import state from "./state.js";
 
 export function renderMessages() {
     const wrap = $('messagesWrap');
@@ -15,7 +16,7 @@ export function renderMessages() {
     wrap.scrollTop = wrap.scrollHeight;
 }
 
-export function sendMessage() {
+export function sendMessage($) {
     const input = $('msgInput');
     const text = input.value.trim();
     if (!text || !currentChannel) return;

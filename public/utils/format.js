@@ -20,7 +20,7 @@ export function initialsFor(name) {
     return String(name).slice(0,2).toUpperCase();
 }
 
-function formatTime(ts) {
+export function formatTime(ts) {
     return new Date(Number(ts)).toLocaleTimeString('tr-TR', {
         hour: '2-digit',
         minute: '2-digit',
