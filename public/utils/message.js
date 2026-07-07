@@ -1,5 +1,11 @@
-import { escapeHtml, avatarColor, formatTime } from "./format.js";
 import { state, $ } from "./state.js";
+import { 
+    escapeHtml, 
+    avatarColor, 
+    formatTime,
+    initialsFor 
+} from "./format.js";
+
 
 export function renderMessages() {
     const wrap = $('messagesWrap');
@@ -21,7 +27,7 @@ export function sendMessage() {
     const text = input.value.trim();
     if (!text || !state.currentChannel) return;
 
-    socket.emit('message:send', { channelId: state.currentChannel.id, text });
+    state.socket.emit('message:send', { channelId: state.currentChannel.id, text });
 
     input.value = '';
     input.style.height = 'auto';
@@ -66,7 +72,7 @@ export function openThread(msgId) {
 }
 
 export function buildMessageRow(m) {
-    const mine = m.userId === myUserId;
+    const mine = m.userId === state.myUserId;
     const row = document.createElement('div');
     row.className = 'msg-row' + (mine ? ' mine' : '');
 

@@ -21,7 +21,7 @@ app.post('/api/token', (req, res) => {
         config.auth.jwtSecret,
         { expiresIn: config.auth.jwtExpiresIn }
     );
-    res.join({ token, userId: username });
+    res.json({ token, userId: username });
 })
 
 const httpServer = createServer(app);

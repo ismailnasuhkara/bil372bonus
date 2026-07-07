@@ -35,7 +35,7 @@ export function connectSocket(token) {
         }
     });
 
-    state.socket.on('messages:list', ({ messages }) => {
+    state.socket.on('message:list', ({ messages }) => {
         if (!state.currentChannel) return;
         // server returns newest-first; render oldest-first
         state.channelMessages[state.currentChannel.id] = [...messages].reverse();

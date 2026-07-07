@@ -13,7 +13,7 @@ export function renderChannels() {
         <div class="ch-name">#${ch.name}</div>
         <div class="ch-last">${ch.desc}</div>
         </div>
-        ${unread[ch.id] ? `<div class="ch-badge">${state.unread[ch.id]}</div>` : ''}
+        ${state.unread[ch.id] ? `<div class="ch-badge">${state.unread[ch.id]}</div>` : ''}
     `;
     item.onclick = () => joinChannel(ch);
     list.appendChild(item);
