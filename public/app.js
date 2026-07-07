@@ -1,5 +1,6 @@
 import { connectSocket } from './utils/socket.js';
 import { renderChannels, joinChannel } from './utils/channel.js';
+import { avatarColor, initialsFor } from "./utils/format.js";
 import { state, $ } from './utils/state.js';
 import {
     renderMessages,

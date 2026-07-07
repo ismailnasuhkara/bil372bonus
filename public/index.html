@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Relay — Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/styles.css" />
+<script src="/socket.io/socket.io.js"></script>
+<style>
+  /* Supplemental styles for elements not covered in styles.css:
+     reactions, pin/thread controls, and the login overlay. */
+  .msg-actions { display: flex; gap: 6px; margin-top: 4px; align-items: center; flex-wrap: wrap; }
+  .msg-action-btn {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text3);
+    border-radius: 20px; font-size: 11px; padding: 2px 8px; cursor: pointer;
+    font-family: var(--mono); transition: background 0.15s, color 0.15s; user-select: none;
+  }
+  .msg-action-btn:hover { background: var(--surface3); color: var(--text); }
+  .msg-action-btn.pinned { background: var(--accent-bg); color: var(--accent2); border-color: var(--accent); }
+  .reaction-pill {
+    background: var(--accent-bg); border: 1px solid var(--border2); color: var(--accent2);
+    border-radius: 20px; font-size: 11.5px; padding: 1px 8px; cursor: pointer; user-select: none;
+  }
+  .thread-box {
+    margin-top: 6px; padding: 8px 10px; background: var(--surface2);
+    border-left: 2px solid var(--accent); border-radius: 0 8px 8px 0; font-size: 12px;
+  }
+  .thread-reply { padding: 3px 0; color: var(--text2); }
+  .thread-reply b { color: var(--text); }
+  .thread-input-row { display: flex; gap: 6px; margin-top: 6px; }
+  .thread-input-row input {
+    flex: 1; background: var(--surface3); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 8px; color: var(--text); font-size: 12px; outline: none; font-family: inherit;
+  }
+  .pin-item { padding: 6px 8px; font-size: 12px; color: var(--text2); border-radius: 7px; }
+  .pin-item:hover { background: var(--surface2); }
+  .pin-item .pin-author { color: var(--text); font-weight: 600; font-size: 11.5px; }
+
+  .login-overlay {
+    position: fixed; inset: 0; background: rgba(13,13,16,0.92);
+    display: flex; align-items: center; justify-content: center; z-index: 100;
+  }
+  .login-card {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 14px;
+    padding: 28px; width: 280px;
+  }
+  .login-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .login-sub { font-size: 12px; color: var(--text2); margin-bottom: 16px; }
+  .login-input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; color: var(--text); font-family: inherit; font-size: 13px; outline: none;
+    margin-bottom: 10px;
+  }
+  .login-btn {
+    width: 100%; background: var(--accent); border: none; border-radius: 8px; padding: 9px;
+    color: #fff; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .login-btn:hover { background: var(--accent2); }
+  .login-error { color: var(--red); font-size: 11.5px; margin-top: 8px; min-height: 14px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <span class="logo-text">Relay</span>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search channels…" />
+      </div>
+    </div>
+
+    <div class="sidebar-section">Channels</div>
+    <div class="channel-list" id="channelList"></div>
+
+    <div class="sidebar-footer">
+      <div class="user-avatar" id="myAvatar">
+        <span id="myInitials">?</span>
+        <div class="status-dot"></div>
+      </div>
+      <div class="user-info">
+        <div class="user-name" id="myName">Loading…</div>
+        <div class="user-status">● Online</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main chat -->
+  <div class="main">
+    <header class="chat-header">
+      <div class="chat-header-icon" id="channelIcon">💬</div>
+      <div class="chat-header-info">
+        <div class="chat-header-name" id="channelName">Select a channel</div>
+        <div class="chat-header-meta" id="channelMeta">—</div>
+      </div>
+      <div class="header-actions">
+        <div class="conn-badge disconnected" id="connBadge">
+          <div class="conn-badge-dot"></div>
+          <span id="connLabel">Connecting…</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="messages-wrap" id="messagesWrap">
+      <div class="msg-empty">
+        <div class="msg-empty-icon">💬</div>
+        <p>Select a channel to start chatting</p>
+      </div>
+    </div>
+
+    <div class="input-bar">
+      <div class="input-wrap">
+        <textarea id="msgInput" placeholder="Message…" rows="1"></textarea>
+        <div class="input-actions">
+          <button class="send-btn" id="sendButton" title="Send">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</div>
+    </div>
+  </div>
+
+  <!-- Pinned messages panel (reuses the members-panel layout; this app has
+       no presence/user directory, so it shows pinned messages instead) -->
+  <aside class="members-panel">
+    <div class="members-header">📌 Pinned — <span id="pinnedCount">0</span></div>
+    <div class="members-list" id="pinnedList"></div>
+  </aside>
+</div>
+
+<!-- Login overlay: there's no real auth system, just JWTs minted by
+     POST /api/token. Pick any username to get one. -->
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-card">
+    <div class="login-title">Join Relay</div>
+    <div class="login-sub">Dev login — pick any username to get a test token.</div>
+    <input id="loginUsername" class="login-input" type="text" placeholder="Username" autofocus />
+    <button id="loginButton" class="login-btn">Join</button>
+    <div id="loginError" class="login-error"></div>
+  </div>
+</div>
+
+<script type="module" src="/app.js"></script>
+</body>
+</html>
