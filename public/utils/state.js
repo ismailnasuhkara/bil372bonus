@@ -6,30 +6,30 @@ export const state = {
             icon: '💬', 
             desc: 'General chat' 
         },
-        { 
-            id: 'random', 
-            name: 'random', 
-            icon: '🎲', 
-            desc: 'Off-topic' 
-        },
-        { 
-            id: 'engineering', 
-            name: 'engineering', 
-            icon: '⚙️',
-            desc: 'Tech talk'
-        },
-        { 
-            id: 'design', 
-            name: 'design', 
-            icon: '🎨', 
-            desc: 'UI/UX' 
-        },
-        { 
-            id: 'announcements', 
-            name: 'announcements', 
-            icon: '📢', 
-            desc: 'Announcements' 
-        },
+        // { 
+        //     id: 'random', 
+        //     name: 'random', 
+        //     icon: '🎲', 
+        //     desc: 'Off-topic' 
+        // },
+        // { 
+        //     id: 'engineering', 
+        //     name: 'engineering', 
+        //     icon: '⚙️',
+        //     desc: 'Tech talk'
+        // },
+        // { 
+        //     id: 'design', 
+        //     name: 'design', 
+        //     icon: '🎨', 
+        //     desc: 'UI/UX' 
+        // },
+        // { 
+        //     id: 'announcements', 
+        //     name: 'announcements', 
+        //     icon: '📢', 
+        //     desc: 'Announcements' 
+        // },
     ],
 
     socket: null,
