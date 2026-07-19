@@ -55,7 +55,15 @@ async function reconnect(key) {
         }
         process.exit(0);
     }
-
+    if (key === "\u0011") { // Ctrl+Q
+    console.log("[redis] Purge requested.");
+    if (redis.isOpen) {
+        await redis.flushAll();
+        console.log("[redis] All records purged.");
+    } else {
+        console.warn("[redis] Cannot purge, connection is not open.");
+    }
+}
 }
 
 if (process.stdin.isTTY) {
