@@ -5,6 +5,7 @@ import {
     formatTime,
     initialsFor 
 } from "./format.js";
+import { deleteMessage } from "../../services/message.service.js";
 
 
 export function renderMessages() {
@@ -111,6 +112,7 @@ export function buildMessageRow(m) {
         <span class="msg-action-btn" data-react="${m.id}">👍 React</span>
         <span class="msg-action-btn ${isPinned ? 'pinned' : ''}" data-pin="${m.id}" data-pinned="${isPinned}">${isPinned ? '📌 Pinned' : '📌 Pin'}</span>
         <span class="msg-action-btn" data-thread="${m.id}">💬 ${replyCount ? replyCount + ' repl' + (replyCount === 1 ? 'y' : 'ies') : 'Reply'}</span>
+        ${mine ? `<span class="msg-action-btn" data-delete="${m.id}">🗑️ Delete</span>` : ''}
         ${reactionsHtml}
         </div>
         ${threadHtml}
@@ -120,9 +122,15 @@ export function buildMessageRow(m) {
     row.querySelector(`[data-react="${m.id}"]`).onclick = () => toggleReaction(m.id, '👍');
     row.querySelector(`[data-pin="${m.id}"]`).onclick = () => togglePin(m.id, isPinned);
     row.querySelector(`[data-thread="${m.id}"]`).onclick = () => openThread(m.id);
+    row.querySelector(`[data-delete="${m.id}"]`).onclick = () => deleteMessage(m.id);
     row.querySelectorAll('.reaction-pill').forEach(el => {
         el.onclick = () => toggleReaction(el.dataset.msg, el.dataset.emoji);
     });
+
+    const deleteBtn = row.querySelector(`[data-delete="${m.id}"]`);
+    if (deleteBtn) {
+        deleteBtn.onclick = () => deleteMessage(m.id);
+    }
     const sendButton = row.querySelector(`[data-reply-send="${m.id}"]`);
     if (sendButton) {
         const doReply = () => {

@@ -1,4 +1,4 @@
-import { sendMessage, getMessages } from '../../services/message.service.js';
+import { sendMessage, getMessages, deleteMessage } from '../../services/message.service.js';
 
 export function registerMessageHandlers(io, socket) {
     socket.on('message:send', async ({ channelId, text, replyTo }) => {
@@ -10,4 +10,12 @@ export function registerMessageHandlers(io, socket) {
         const msg = await getMessages(channelId, { before, limit });
         socket.emit('message:list', msg);
     })
+
+    socket.on('message:delete', async ({ msgId }) => {
+        const { channelId, replyTo } = await deleteMessage(msgId);
+        io.to(channelId).emit('message:deleted', { msgId });
+        if (replyTo) {
+            io.to(`thread:${replyTo}`).emit('message:deleted', { msgId });
+        }
+    });
 }

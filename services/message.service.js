@@ -25,3 +25,32 @@ export async function getMessages(channelId, { before, limit }) {
     const messages = await batchGetMessages(items.map(item => item.id));
     return { messages, next }
 }
+
+export async function deleteMessage(msgId) {
+    const msg = await redis.hGetAll(msgKey(msgId));
+    if (!msg?.text) throw new Error(`ERROR: Message ${msgId} not found`);
+
+    const reactionCounts = await redis.hGetAll(reactCountKey(msgId));
+    const emojis = Object.keys(reactionCounts);
+
+    const multi = redis
+        .multi()
+        .del(msgKey(msgId))
+        .zRem(channelMsgKey(msg.channelId), msgId)
+        .zRem(pinsKey(msg.channelId), msgId)
+        .del(reactCountKey(msgId));
+
+    emojis.forEach(emoji => multi.del(reactSetKey(msgId, emoji)));
+
+    if (msg.replyTo) {
+        multi
+            .zRem(threadKey(msg.replyTo), msgId)
+            .hIncrBy(msgKey(msg.replyTo), 'replyCount', -1);
+    } else {
+        multi.del(threadKey(msgId));
+    }
+
+    await multi.exec();
+
+    return { id: msgId, channelId: msg.channelId, replyTo: msg.replyTo || null };
+}
