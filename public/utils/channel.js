@@ -36,3 +36,9 @@ export function joinChannel(ch) {
     renderChannels();
     renderMessages();
 }
+
+
+export function deleteMessage(msgId) {
+    if (!confirm('Delete this message?')) return;
+    state.socket.emit('message:delete', { msgId });
+}

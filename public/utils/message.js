@@ -5,7 +5,7 @@ import {
     formatTime,
     initialsFor 
 } from "./format.js";
-import { deleteMessage } from "../../services/message.service.js";
+import { deleteMessage } from "./channel.js";
 
 
 export function renderMessages() {
