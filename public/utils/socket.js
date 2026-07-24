@@ -78,4 +78,30 @@ export function connectSocket(token) {
         if (target) target.replyCount = replyCount;
         renderMessages();
     });
+
+    state.socket.on('message:deleted', ({ msgId }) => {
+        for (const channelId in state.channelMessages) {
+            state.channelMessages[channelId] = state.channelMessages[channelId].filter(m => m.id !== msgId);
+        }
+        for (const parentId in state.threadReplies) {
+            state.threadReplies[parentId] = state.threadReplies[parentId].filter(r => r.id !== msgId);
+        }
+        state.currentPins = state.currentPins.filter(p => p.id !== msgId);
+
+        renderMessages();
+        renderPinned();
+    });
+
+    state.socket.on('data:purged', () => {
+        state.channelMessages = {};
+        state.threadReplies = {};
+        state.reactionsByMsg = {};
+        state.currentPins = [];
+        state.openThreads.clear();
+        state.unread = {};
+
+        renderMessages();
+        renderPinned();
+        renderChannels();
+    });
 }

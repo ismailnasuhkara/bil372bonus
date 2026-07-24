@@ -122,14 +122,12 @@ export function buildMessageRow(m) {
     row.querySelector(`[data-react="${m.id}"]`).onclick = () => toggleReaction(m.id, '👍');
     row.querySelector(`[data-pin="${m.id}"]`).onclick = () => togglePin(m.id, isPinned);
     row.querySelector(`[data-thread="${m.id}"]`).onclick = () => openThread(m.id);
-    row.querySelector(`[data-delete="${m.id}"]`).onclick = () => deleteMessage(m.id);
     row.querySelectorAll('.reaction-pill').forEach(el => {
         el.onclick = () => toggleReaction(el.dataset.msg, el.dataset.emoji);
     });
-
-    const deleteBtn = row.querySelector(`[data-delete="${m.id}"]`);
-    if (deleteBtn) {
-        deleteBtn.onclick = () => deleteMessage(m.id);
+    const deleteButton = row.querySelector(`[data-delete="${m.id}"]`);
+    if (deleteButton) {
+        deleteButton.onclick = () => deleteMessage(m.id);
     }
     const sendButton = row.querySelector(`[data-reply-send="${m.id}"]`);
     if (sendButton) {

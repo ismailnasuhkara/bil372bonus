@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 import { initSocket } from './socket/index.js';
+import { redisEvents } from './redis/client.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -26,8 +27,12 @@ app.post('/api/token', (req, res) => {
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: config.server.clientUrl } });
-
 initSocket(io);
+
+redisEvents.on('purge', () => {
+    io.emit('data:purged');
+})
+
 httpServer.listen(config.server.port ?? 3000, () => {
     console.log(`[redis] Server listening on port ${config.server.port ?? 3000}`);
 });

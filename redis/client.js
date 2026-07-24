@@ -1,5 +1,8 @@
 import { createClient, ReconnectStrategyError } from "redis";
 import { config } from '../config.js';
+import { EventEmitter } from "events";
+
+export const redisEvents = new EventEmitter();
 
 const {
     REDIS_HOST      = 'localhost',
@@ -60,6 +63,7 @@ async function reconnect(key) {
     if (redis.isOpen) {
         await redis.flushAll();
         console.log("[redis] All records purged.");
+        redisEvents.emit('purge');
     } else {
         console.warn("[redis] Cannot purge, connection is not open.");
     }

@@ -1,6 +1,6 @@
 import redis from '../redis/client.js';
 import { v4 as uuid } from 'uuid';
-import { msgKey, channelMsgKey, threadKey } from '../models/message.model.js';
+import { msgKey, channelMsgKey, threadKey, pinsKey, reactSetKey, reactCountKey } from '../models/message.model.js';
 import { paginateZSet, batchGetMessages } from '../utils/pipeline.js';
 
 export async function sendMessage({ channelId, userId, text, replyTo }) {
